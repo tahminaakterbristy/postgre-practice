@@ -1,0 +1,16 @@
+import app from "./app";
+import { initDB } from "./config/initDB";
+const PORT = process.env.PORT || 5000;
+const startServer = async () => {
+    try {
+        await initDB();
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    }
+    catch (error) {
+        console.log(error);
+    }
+};
+startServer();
+//# sourceMappingURL=server.js.map
