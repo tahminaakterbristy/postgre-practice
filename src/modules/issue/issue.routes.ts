@@ -4,7 +4,7 @@ import {
 createIssueController,
 getIssuesController,
 getSingleIssueController,
-deleteIssueController
+deleteIssueController,updateIssueController
 }
 from "./issue.controller";
 
@@ -49,6 +49,11 @@ authorize("maintainer"),
 deleteIssueController
 );
 
-
+router.patch(
+"/:id",
+auth,
+authorize("maintainer"),
+updateIssueController
+);
 
 export default router;

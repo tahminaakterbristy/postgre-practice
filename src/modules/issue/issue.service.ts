@@ -99,3 +99,48 @@ WHERE id=$1
 return true;
 
 };
+
+export const updateIssue = async(
+id:number,
+payload:any
+)=>{
+
+
+const {
+title,
+description,
+type,
+status
+}=payload;
+
+
+const result =
+await pool.query(
+`
+UPDATE issues
+
+SET
+title=$1,
+description=$2,
+type=$3,
+status=$4,
+updated_at=NOW()
+
+WHERE id=$5
+
+RETURNING *
+`,
+[
+title,
+description,
+type,
+status,
+id
+]
+
+);
+
+
+return result.rows[0];
+
+};

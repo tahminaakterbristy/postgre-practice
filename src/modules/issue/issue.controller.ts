@@ -4,7 +4,8 @@ import {
 createIssue,
 getAllIssues,
 getSingleIssue,
-deleteIssue
+deleteIssue,
+updateIssue
 }
 from "./issue.service";
 
@@ -130,6 +131,33 @@ res.status(200).json({
 success:true,
 
 message:"Issue deleted successfully"
+
+});
+
+
+};
+
+export const updateIssueController =
+async(
+req:AuthRequest,
+res:Response
+)=>{
+
+
+const result =
+await updateIssue(
+Number(req.params.id),
+req.body
+);
+
+
+res.status(200).json({
+
+success:true,
+
+message:"Issue updated successfully",
+
+data:result
 
 });
 
