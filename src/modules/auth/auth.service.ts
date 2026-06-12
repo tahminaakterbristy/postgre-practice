@@ -1,27 +1,22 @@
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { pool } from "../../config/db";
 
+
 export const signupUser = async (payload: any) => {
+
   const { name, email, password, role } = payload;
 
-  const userExists = await pool.query(
-    "SELECT * FROM users WHERE email=$1",
-    [email]
-  );
 
-  if (userExists.rows.length) {
-    throw new Error("Email already exists");
-  }
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-  const hashedPassword = await bcrypt.hash(
-    password,
-    Number(process.env.BCRYPT_SALT_ROUNDS)
-  );
 
   const result = await pool.query(
-    `INSERT INTO users(name,email,password,role)
-     VALUES($1,$2,$3,$4)
-     RETURNING id,name,email,role,created_at,updated_at`,
+    `
+    INSERT INTO users(name,email,password,role)
+    VALUES($1,$2,$3,$4)
+    RETURNING id,name,email,role,created_at,updated_at
+    `,
     [
       name,
       email,
@@ -30,5 +25,74 @@ export const signupUser = async (payload: any) => {
     ]
   );
 
+
   return result.rows[0];
+};
+
+
+
+export const loginUser = async (payload:{
+  email:string;
+  password:string;
+})=>{
+
+
+ const {email,password}=payload;
+
+
+ const result = await pool.query(
+  "SELECT * FROM users WHERE email=$1",
+  [email]
+ );
+
+
+ const user=result.rows[0];
+
+
+ if(!user){
+  throw new Error("User not found");
+ }
+
+
+
+ const isPasswordMatched =
+ await bcrypt.compare(
+  password,
+  user.password
+ );
+
+
+ if(!isPasswordMatched){
+  throw new Error("Invalid password");
+ }
+
+
+
+ const token = jwt.sign(
+  {
+    id:user.id,
+    name:user.name,
+    role:user.role
+  },
+  process.env.JWT_SECRET as string,
+  {
+    expiresIn:"7d"
+  }
+ );
+
+
+ return {
+  token,
+
+  user:{
+    id:user.id,
+    name:user.name,
+    email:user.email,
+    role:user.role,
+    created_at:user.created_at,
+    updated_at:user.updated_at
+  }
+ };
+
+
 };
